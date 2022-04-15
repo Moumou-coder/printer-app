@@ -1,33 +1,66 @@
 import React, {useRef, useState} from 'react';
 
 const Printer = () => {
-    const [printerIPAddress, setPrinterIPAddress] = useState("192.168.0.239");
-    const [printerPort, setPrinterPort] = useState("8008");
+    const [ipAddress, setIpAddress] = useState("192.168.0.239");
+    const [port, setPort] = useState("8008");
+    const deviceID_printer = 'local_printer';
     const [textToPrint, setTextToPrint] = useState("");
     const [connectionStatus, setConnectionStatus] = useState("");
 
     const STATUS_CONNECTED = "Connected"
+    let ePosDev = new window.epson.ePOSDevice();
+    let printer = null;
 
-    const connect = () => {
-        console.log("je vais me connecter ! ")
+    function connect() {
+        ePosDev.connect(ipAddress, port, callback_connect);
     }
 
-    const print = () => {
-        console.log("ceci va me permettre d'imprimer")
+    function callback_connect(data) {
+        if(data == 'OK' || data == 'SSL_CONNECT_OK') {
+            ePosDev.createDevice('local_printer', ePosDev.DEVICE_TYPE_PRINTER,
+                {'crypto':false, 'buffer':false}, cbCreateDevice_printer);
+        } else {
+            alert("Connection failed:" + ipAddress + ":" + port + ", data = " + data);
+        }
     }
+
+    function cbCreateDevice_printer(devobj, retcode) {
+        if( retcode == 'OK' ) {
+            printer = devobj;
+            printer.timeout = 60000;
+            printer.onreceive = function (res) { alert(res.success); };
+            printer.oncoveropen = function () { alert('coveropen'); };
+            setConnectionStatus(STATUS_CONNECTED)
+        } else {
+            alert(retcode);
+        }
+    }
+
+    const print = (text) => {
+        if (!printer) {
+            alert("Not connected to printer");
+            return;
+        }
+        printer.addTextAlign(printer.ALIGN_CENTER);
+        printer.addText(text);
+        printer.send();
+        printer.addCut(printer.CUT_FEED);
+        printer.send();
+    };
+
     return (
         <>
             <input
                 id="printerIPAddress"
                 placeholder="Printer IP Address"
-                value={printerIPAddress}
-                onChange={(e) => setPrinterIPAddress(e.currentTarget.value)}
+                value={ipAddress}
+                onChange={(e) => setIpAddress(e.currentTarget.value)}
             />
             <input
                 id="printerPort"
                 placeholder="Printer Port"
-                value={printerPort}
-                onChange={(e) => setPrinterPort(e.currentTarget.value)}
+                value={port}
+                onChange={(e) => setPort(e.currentTarget.value)}
             />
             <button
                 disabled={connectionStatus === STATUS_CONNECTED}
