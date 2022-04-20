@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 const Printer = () => {
 	const [ipAddress, setIpAddress] = useState("192.168.1.24");
 	const [port, setPort] = useState("8008");
-	const [textToPrint, setTextToPrint] = useState("please work hello my world");
+	// const [textToPrint, setTextToPrint] = useState("please work hello my world");
 	const [connectionStatus, setConnectionStatus] = useState("");
 
 	//constantes
@@ -12,6 +12,7 @@ const Printer = () => {
 	const options = { crypto: false, buffer: false };
 	const printer = useRef();
 	const ePosDev = new window.epson.ePOSDevice();
+	const userId = "XML204";
 
 	function connect() {
 		ePosDev.connect(ipAddress, port, callback_connect);
@@ -51,7 +52,9 @@ const Printer = () => {
 			alert("Not connected to printer");
 			return;
 		}
-		device.addText(text);
+		device.addText(userId);
+		device.addFeedLine(0);
+		device.addCut(device.CUT_FEED);
 		device.send();
 	};
 
@@ -76,16 +79,16 @@ const Printer = () => {
 				Connect
 			</button>
 			<span className="status-label">{connectionStatus}</span>
-			<textarea
+			{/* <textarea
 				id="textToPrint"
 				rows="3"
 				placeholder="Text to print"
 				value={textToPrint}
 				onChange={(e) => setTextToPrint(e.currentTarget.value)}
-			/>
+			/> */}
 			<button
 				disabled={connectionStatus !== STATUS_CONNECTED}
-				onClick={() => print(textToPrint)}
+				onClick={() => print()}
 			>
 				Print
 			</button>
