@@ -8,7 +8,8 @@ function App() {
 			<h1>Connect to TM-U22 printer</h1>
 			<hr />
 			<header className="App-header">
-				<Thermal />
+				{/* <Thermal /> */}
+				<Printer />
 			</header>
 		</div>
 	);

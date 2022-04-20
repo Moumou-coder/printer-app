@@ -1,15 +1,17 @@
 import React, { useRef, useState } from "react";
 
 const Printer = () => {
-	const [ipAddress, setIpAddress] = useState("192.168.0.239");
+	const [ipAddress, setIpAddress] = useState("192.168.1.24");
 	const [port, setPort] = useState("8008");
-	const deviceID_printer = "local_printer";
-	const [textToPrint, setTextToPrint] = useState("");
+	const [textToPrint, setTextToPrint] = useState("please work hello my world");
 	const [connectionStatus, setConnectionStatus] = useState("");
 
+	//constantes
 	const STATUS_CONNECTED = "Connected";
-	let ePosDev = new window.epson.ePOSDevice();
-	let printer;
+	const deviceID_printer = "local_printer";
+	const options = { crypto: false, buffer: false };
+	const printer = useRef();
+	const ePosDev = new window.epson.ePOSDevice();
 
 	function connect() {
 		ePosDev.connect(ipAddress, port, callback_connect);
@@ -18,9 +20,9 @@ const Printer = () => {
 	function callback_connect(data) {
 		if (data == "OK" || data == "SSL_CONNECT_OK") {
 			ePosDev.createDevice(
-				"local_printer",
+				deviceID_printer,
 				ePosDev.DEVICE_TYPE_PRINTER,
-				{ crypto: false, buffer: false },
+				options,
 				cbCreateDevice_printer
 			);
 		} else {
@@ -30,7 +32,7 @@ const Printer = () => {
 
 	function cbCreateDevice_printer(devobj, retcode) {
 		if (retcode == "OK") {
-			printer = devobj;
+			printer.current = devobj;
 			printer.onreceive = function (res) {
 				alert(res.success);
 			};
@@ -44,15 +46,13 @@ const Printer = () => {
 	}
 
 	const print = (text) => {
-		// if (!printer) {
-		// 	alert("Not connected to printer");
-		// 	return;
-		// }
-		printer.addTextAlign(printer.ALIGN_CENTER);
-		printer.addText(text);
-		printer.send();
-		printer.addCut(printer.CUT_FEED);
-		printer.send();
+		let device = printer.current;
+		if (!device) {
+			alert("Not connected to printer");
+			return;
+		}
+		device.addText(text);
+		device.send();
 	};
 
 	return (
