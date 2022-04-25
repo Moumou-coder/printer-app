@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 const Printer = () => {
 	const [ipAddress, setIpAddress] = useState("192.168.1.24");
 	const [port, setPort] = useState("8008");
-	// const [textToPrint, setTextToPrint] = useState("please work hello my world");
+	const [textToPrint, setTextToPrint] = useState("please work hello my world");
 	const [connectionStatus, setConnectionStatus] = useState("");
 
 	//constantes
@@ -12,13 +12,14 @@ const Printer = () => {
 	const options = { crypto: false, buffer: false };
 	const printer = useRef();
 	const ePosDev = new window.epson.ePOSDevice();
-	const userId = "XML204";
+	const userId = "Mouad M";
 
 	function connect() {
 		ePosDev.connect(ipAddress, port, callback_connect);
 	}
 
 	function callback_connect(data) {
+		console.log("data: " + data)
 		if (data == "OK" || data == "SSL_CONNECT_OK") {
 			ePosDev.createDevice(
 				deviceID_printer,
@@ -28,6 +29,7 @@ const Printer = () => {
 			);
 		} else {
 			alert("Connection failed:" + ipAddress + ":" + port + ", data = " + data);
+			console.log("Connection failed:" + ipAddress + ":" + port + ", data = " + data);
 		}
 	}
 
@@ -48,11 +50,12 @@ const Printer = () => {
 
 	const print = (text) => {
 		let device = printer.current;
+		console.log("printer is : " + device)
 		if (!device) {
 			alert("Not connected to printer");
 			return;
 		}
-		device.addText(userId);
+		device.addText(text);
 		device.addFeedLine(0);
 		device.addCut(device.CUT_FEED);
 		device.send();
@@ -79,13 +82,13 @@ const Printer = () => {
 				Connect
 			</button>
 			<span className="status-label">{connectionStatus}</span>
-			{/* <textarea
+			{ <textarea
 				id="textToPrint"
 				rows="3"
 				placeholder="Text to print"
 				value={textToPrint}
 				onChange={(e) => setTextToPrint(e.currentTarget.value)}
-			/> */}
+			/> }
 			<button
 				disabled={connectionStatus !== STATUS_CONNECTED}
 				onClick={() => print()}
