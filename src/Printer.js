@@ -52,8 +52,12 @@ const Printer = () => {
 			alert("Not connected to printer");
 			return;
 		}
-		device.addText(userId);
-		device.addFeedLine(0);
+		device.addTextAlign(device.ALIGN_CENTER);
+		device.addTextFont(device.FONT_A);
+		device.addTextSmooth(true);
+		device.addTextDouble(true, true);
+		device.addText("Hello");
+		device.addFeed();
 		device.addCut(device.CUT_FEED);
 		device.send();
 	};
